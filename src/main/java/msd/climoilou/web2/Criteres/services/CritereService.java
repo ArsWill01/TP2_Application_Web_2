@@ -30,6 +30,10 @@ public class CritereService {
         return critereRepository.existsById(id);
     }
 
+    public Collection<Critere> getCritereById(long id){
+        return critereRepository.findCritereById(id);
+    }
+
     public Critere save(Critere critere){
         return critereRepository.save(critere);
     }

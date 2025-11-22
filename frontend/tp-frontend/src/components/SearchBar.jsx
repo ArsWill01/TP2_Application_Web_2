@@ -18,7 +18,6 @@ export default function SearchBar({setSearchCriteria}) {
     };
 
     const handleDeleteClick = async () => {
-        console.log(critere)
         setIsEditable(!isEditable);
         textRef.current.value = '';
         dateRef.current.value = '';

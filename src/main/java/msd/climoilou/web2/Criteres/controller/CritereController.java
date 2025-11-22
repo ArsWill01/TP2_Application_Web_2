@@ -4,6 +4,7 @@ import msd.climoilou.web2.Criteres.model.Critere;
 import msd.climoilou.web2.Criteres.repository.CritereRepository;
 import msd.climoilou.web2.Criteres.services.CritereService;
 import msd.climoilou.web2.Nouvelles.model.Nouvelle;
+import msd.climoilou.web2.Nouvelles.services.NouvelleService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,16 +14,24 @@ import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
 import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @CrossOrigin(origins = {"http://localhost:5173","http://localhost:5174","http://localhost:5175"})
 @RestController
 @RequestMapping("/criteres")
 public class CritereController {
 
-    @Autowired
-    private CritereService critereService;
+    private final CritereService critereService;
+    private final NouvelleService nouvelleService;
 
-    private Logger logger = LoggerFactory.getLogger(CritereController.class);
+    private final Logger logger = LoggerFactory.getLogger(CritereController.class);
+
+    public CritereController(CritereService critereService, NouvelleService nouvelleService) {
+        this.critereService = critereService;
+        this.nouvelleService = nouvelleService;
+    }
 
     @GetMapping
     public Collection<Critere> getAllCriteres() throws InterruptedException {
@@ -31,11 +40,26 @@ public class CritereController {
         return critereService.getAll();
     }
 
-    @GetMapping("/nouvelles")
-    public Collection<Critere> getNouvellesCriteres() throws InterruptedException {
+    @GetMapping("/{id}/nouvelles")
+    public ResponseEntity<List<Long>> getNouvellesCriteres(@PathVariable long id) throws InterruptedException {
         logger.info("NouvelleController getNouvellesCriteres");
-
-        return critereService.getAll();
+        try{
+            if (critereService.existsById(id)) {
+                Optional<Critere> critere = critereService.getCritereById(id).stream().findFirst();
+                if(critere.isEmpty()){
+                    return ResponseEntity.notFound().build();
+                }
+                Collection<Nouvelle> nouvelles = nouvelleService.getAll(critere.get());
+                List<Long> ids = nouvelles.stream()
+                        .map(Nouvelle::getId)
+                        .toList();
+                return ResponseEntity.ok(ids);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (Exception e){
+            return ResponseEntity.internalServerError().build();
+        }
     }
 
     @DeleteMapping("/{id}")

@@ -17,7 +17,7 @@ public class UtilisateurController {
 
     private final UtilisateurService utilisateurService;
 
-    private Logger logger = LoggerFactory.getLogger(UtilisateurController.class);
+    private final Logger logger = LoggerFactory.getLogger(UtilisateurController.class);
 
     public UtilisateurController(UtilisateurService utilisateurService) {
         this.utilisateurService = utilisateurService;

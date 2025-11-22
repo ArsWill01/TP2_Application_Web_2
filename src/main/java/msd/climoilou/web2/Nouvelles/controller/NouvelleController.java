@@ -20,7 +20,7 @@ public class NouvelleController {
 
     private final NouvelleService nouvelleService;
 
-    private Logger logger = LoggerFactory.getLogger(NouvelleController.class);
+    private final Logger logger = LoggerFactory.getLogger(NouvelleController.class);
 
     public NouvelleController(NouvelleService nouvelleService) {
         this.nouvelleService = nouvelleService;
