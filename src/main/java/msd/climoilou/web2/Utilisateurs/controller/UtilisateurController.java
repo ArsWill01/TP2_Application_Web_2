@@ -1,7 +1,7 @@
 package msd.climoilou.web2.Utilisateurs.controller;
 
 import msd.climoilou.web2.Utilisateurs.model.Utilisateur;
-import msd.climoilou.web2.Utilisateurs.repository.UtilisateurRepository;
+import msd.climoilou.web2.Utilisateurs.services.UtilisateurService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,15 +15,18 @@ import java.util.Collection;
 @RestController
 public class UtilisateurController {
 
-    @Autowired
-    private UtilisateurRepository nouvelleRepository;
+    private final UtilisateurService utilisateurService;
 
     private Logger logger = LoggerFactory.getLogger(UtilisateurController.class);
+
+    public UtilisateurController(UtilisateurService utilisateurService) {
+        this.utilisateurService = utilisateurService;
+    }
 
     @GetMapping("/utilisateurs")
     public Collection<Utilisateur> getAllUtilisateurs() throws InterruptedException {
         logger.info("UtilisateurController getAllUtilisateurs");
 
-        return nouvelleRepository.findAll();
+        return utilisateurService.getAll();
     }
 }

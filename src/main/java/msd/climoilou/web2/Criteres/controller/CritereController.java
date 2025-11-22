@@ -2,6 +2,7 @@ package msd.climoilou.web2.Criteres.controller;
 
 import msd.climoilou.web2.Criteres.model.Critere;
 import msd.climoilou.web2.Criteres.repository.CritereRepository;
+import msd.climoilou.web2.Criteres.services.CritereService;
 import msd.climoilou.web2.Nouvelles.model.Nouvelle;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -19,7 +20,7 @@ import java.util.Collection;
 public class CritereController {
 
     @Autowired
-    private CritereRepository critereRepository;
+    private CritereService critereService;
 
     private Logger logger = LoggerFactory.getLogger(CritereController.class);
 
@@ -27,14 +28,14 @@ public class CritereController {
     public Collection<Critere> getAllCriteres() throws InterruptedException {
         logger.info("CritereController getAllCriteres");
 
-        return critereRepository.findAll();
+        return critereService.getAll();
     }
 
     @GetMapping("/nouvelles")
     public Collection<Critere> getNouvellesCriteres() throws InterruptedException {
         logger.info("NouvelleController getNouvellesCriteres");
 
-        return critereRepository.findAll();
+        return critereService.getAll();
     }
 
     @DeleteMapping("/{id}")
@@ -42,12 +43,12 @@ public class CritereController {
         logger.info("CritereController deleteCritere pour l'ID: {}", id);
 
         try {
-            critereRepository.deleteById(id);
+            critereService.deleteById(id);
 
             return ResponseEntity.noContent().build();
 
         } catch (EmptyResultDataAccessException e) {
-            if (critereRepository.existsById(id)) {
+            if (critereService.existsById(id)) {
                 return ResponseEntity.internalServerError().build();
             }
 
@@ -63,7 +64,7 @@ public class CritereController {
         try {
             critere.setId(null);
 
-            Critere critereSauvegardee = critereRepository.save(critere);
+            Critere critereSauvegardee = critereService.save(critere);
 
             return ResponseEntity
                     .created(URI.create("/criteres/" + critereSauvegardee.getId()))

@@ -2,6 +2,7 @@ package msd.climoilou.web2.Nouvelles.controller;
 
 import msd.climoilou.web2.Nouvelles.model.Nouvelle;
 import msd.climoilou.web2.Nouvelles.repository.NouvelleRepository;
+import msd.climoilou.web2.Nouvelles.services.NouvelleService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,16 +18,19 @@ import java.util.Collection;
 @RequestMapping("/nouvelles")
 public class NouvelleController {
 
-    @Autowired
-    private NouvelleRepository nouvelleRepository;
+    private final NouvelleService nouvelleService;
 
     private Logger logger = LoggerFactory.getLogger(NouvelleController.class);
+
+    public NouvelleController(NouvelleService nouvelleService) {
+        this.nouvelleService = nouvelleService;
+    }
 
     @GetMapping
     public Collection<Nouvelle> getAllNouvelles() throws InterruptedException {
         logger.info("NouvelleController getAllNouvelles");
 
-        return nouvelleRepository.findAll();
+        return nouvelleService.getAll();
     }
 
     @DeleteMapping("/{id}")
@@ -34,19 +38,15 @@ public class NouvelleController {
         logger.info("NouvelleController deleteNouvelle pour l'ID: {}", id);
 
         try {
-            nouvelleRepository.deleteById(id);
+            nouvelleService.deleteById(id);
 
-            // Retourne une réponse 204 NO CONTENT si la suppression est réussie (ou si l'élément n'existait pas)
-            // C'est le standard pour une suppression réussie sans corps de réponse.
             return ResponseEntity.noContent().build();
 
         } catch (EmptyResultDataAccessException e) {
-            if (nouvelleRepository.existsById(id)) {
-                // Gère les cas où l'élément existe mais la suppression a échoué pour d'autres raisons.
+            if (nouvelleService.existsById(id)) {
                 return ResponseEntity.internalServerError().build();
             }
 
-            // Si l'élément n'existe pas, on retourne 404 Not Found.
             logger.warn("Tentative de suppression d'une Nouvelle inexistante avec l'ID: {}", id);
             return ResponseEntity.notFound().build();
         }
@@ -57,24 +57,39 @@ public class NouvelleController {
         logger.info("NouvelleController updateNouvelle pour l'ID: {}", id);
 
         try {
-            nouvelleRepository.findNouvelleById(id);
+            nouvelleService.findNouvelleById(id);
             Nouvelle nouvelle;
             nouvelle = detailsNouvelle;
-            nouvelleRepository.save(nouvelle);
+            nouvelleService.save(nouvelle);
 
-            // Retourne une réponse 204 NO CONTENT si la suppression est réussie (ou si l'élément n'existait pas)
-            // C'est le standard pour une suppression réussie sans corps de réponse.
             return ResponseEntity.noContent().build();
 
         } catch (EmptyResultDataAccessException e) {
-            if (nouvelleRepository.existsById(id)) {
-                // Gère les cas où l'élément existe mais la suppression a échoué pour d'autres raisons.
+            if (nouvelleService.existsById(id)) {
                 return ResponseEntity.internalServerError().build();
             }
 
-            // Si l'élément n'existe pas, on retourne 404 Not Found.
             logger.warn("Tentative d'update d'une Nouvelle inexistante avec l'ID: {}", id);
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping
+    public ResponseEntity<Nouvelle> createNouvelle(@RequestBody Nouvelle nouvelle) {
+        logger.info("NouvelleController createNouvelle");
+
+        try {
+            nouvelle.setId(null);
+
+            Nouvelle nouvelleSauvegardee = nouvelleService.save(nouvelle);
+
+            return ResponseEntity
+                    .created(URI.create("/nouvelles/" + nouvelleSauvegardee.getId()))
+                    .body(nouvelleSauvegardee);
+
+        } catch (Exception e) {
+            logger.error("Erreur lors de la création de la Nouvelle: {}", e.getMessage());
+            return ResponseEntity.internalServerError().build();
         }
     }
 }
