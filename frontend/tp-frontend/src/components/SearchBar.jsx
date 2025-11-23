@@ -12,7 +12,6 @@ export default function SearchBar({setSearchCriteria}) {
     const handleSearchClick = async () => {
         if (textRef.current.value || dateRef.current.value) {
             setIsEditable(!isEditable);
-            setSearchCriteria([textRef.current.value, dateRef.current.value])
             await saveSearchCriteria(textRef.current.value, dateRef.current.value);
         }
     };
@@ -21,7 +20,7 @@ export default function SearchBar({setSearchCriteria}) {
         setIsEditable(!isEditable);
         textRef.current.value = '';
         dateRef.current.value = '';
-        setSearchCriteria(['', ''])
+        setSearchCriteria([])
     };
 
     async function saveSearchCriteria(text, date) {
@@ -40,14 +39,29 @@ export default function SearchBar({setSearchCriteria}) {
             console.error("Erreur lors de la lecture de l'historique de recherche:", error);
             searchCriteriaList = [];
         }
-        const isExisting = searchCriteriaList.some(criteria =>
+        const criteria = searchCriteriaList.find(criteria =>
             criteria.textRecherche === newSearchCriteria.textRecherche &&
             criteria.dateRecherche === newSearchCriteria.dateRecherche
         );
 
-        if (!isExisting) {
-            await postCritere(newSearchCriteria, searchCriteriaList)
+        let criteriaId = null;
+        if (!criteria) {
+            criteriaId = await postCritere(newSearchCriteria, searchCriteriaList);
+        } else {
+            criteriaId = criteria.id;
         }
+
+        const fetchUrl = `http://localhost:8080/criteres/${criteriaId}/nouvelles`;
+
+        const fetchResponse = await fetch(fetchUrl);
+
+        if (!fetchResponse.ok) {
+            throw new Error(`Failed to fetch news IDs: ${fetchResponse.statusText}`);
+        }
+
+        // The response body is the List<Long> from your server
+        const newsIdList = await fetchResponse.json();
+        setSearchCriteria([newsIdList])
     }
 
     async function postCritere(newCritere, searchCriteriaList) {
@@ -69,13 +83,15 @@ export default function SearchBar({setSearchCriteria}) {
                 localStorage.setItem("searchCriteriaList", JSON.stringify(searchCriteriaList));
 
                 console.log(`Ajouter critere dans le serveur et localement.`);
-
+                return createdCritere.id;
             } else {
                 console.error(`Échec de la création de la critere. Statut HTTP: ${response.status}`);
+                return null
             }
 
         } catch (error) {
             console.error(`Erreur réseau lors de la création de la critere :`, error);
+            return null
         }
     }
 

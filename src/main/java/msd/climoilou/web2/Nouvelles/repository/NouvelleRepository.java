@@ -9,7 +9,7 @@ import java.util.Collection;
 public interface NouvelleRepository extends JpaRepository<Nouvelle, Long> {
     Collection<Nouvelle> findNouvelleById(Long id);
 
-    Collection<Nouvelle> findByTexteContainingAndDateGreaterThanEqual(String titre, LocalDateTime date);
+    Collection<Nouvelle> findByTexteContainingAndDateGreaterThanEqual(String texte, LocalDateTime date);
 
     Collection<Nouvelle> findByTexteContaining(String texte);
 

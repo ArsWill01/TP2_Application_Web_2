@@ -9,7 +9,7 @@ export default function NewsDisplay({newsState: news, setNewsState: setNews, use
 
     const [isAdding, setIsAdding] = useState(false);
     const [editingId, setEditingId] = useState(null);
-    const [searchCriteria, setSearchCriteria] = useState(['', '']);
+    const [searchCriteria, setSearchCriteria] = useState([]);
 
     function handleToggleEditing(id) {
         setEditingId(id);
@@ -142,22 +142,21 @@ export default function NewsDisplay({newsState: news, setNewsState: setNews, use
         }
     }
 
-    const [searchText, filterDateString] = searchCriteria;
+    const [idList] = searchCriteria;
 
-    const lowercasedSearchText = searchText.toLowerCase().trim();
-    const dateToFilter = filterDateString ? new Date(filterDateString) : null;
+    const idsToFilter = Array.isArray(idList)
+        ? idList.map(Number)
+        : [];
+
+    const hasIdsToFilter = idsToFilter.length > 0;
 
     const filteredNews = news.filter((nouvelle) => {
+        if (!hasIdsToFilter) {
+            return true;
+        }
+        const idMatches = idsToFilter.includes(nouvelle.id);
 
-        const textMatches = lowercasedSearchText === '' ||
-            nouvelle.resume.toLowerCase().includes(lowercasedSearchText);
-
-        const itemDate = new Date(nouvelle.date);
-
-        const dateMatches = !dateToFilter ||
-            itemDate >= dateToFilter;
-
-        return textMatches && dateMatches;
+        return idMatches;
     });
 
     const isModalOpen = isAdding || editingId !== null;

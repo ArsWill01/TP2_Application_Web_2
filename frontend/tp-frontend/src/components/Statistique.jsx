@@ -35,7 +35,7 @@ export default function Statistique({newsState: news}){
         const dateToFilter = filterDateString ? new Date(filterDateString) : null;
 
         const count = news.filter((nouvelle) => {
-            const textMatches = searchText === '' || nouvelle.resume.toLowerCase().includes(searchText);
+            const textMatches = searchText === '' || nouvelle.texte.toLowerCase().includes(searchText);
             const itemDate = new Date(nouvelle.date);
             const dateMatches = !dateToFilter || itemDate >= dateToFilter;
             return textMatches && dateMatches;

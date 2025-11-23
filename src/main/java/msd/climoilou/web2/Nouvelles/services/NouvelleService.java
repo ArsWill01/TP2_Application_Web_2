@@ -46,24 +46,24 @@ public class NouvelleService {
         LocalDateTime localDateTime = null;
         if (!Objects.isNull(dateRecherche) && !dateRecherche.isEmpty()) {
             String pattern = "yyyy-MM-dd HH:mm:ss";
-
+            dateRecherche = dateRecherche + " 00:00:00";
             DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
 
             localDateTime = LocalDateTime.parse(dateRecherche, formatter);
         }
 
-        if (!Objects.isNull(texteRecherche) && !Objects.isNull(dateRecherche)) {
+        if (!Objects.isNull(texteRecherche) && !texteRecherche.isEmpty() && !Objects.isNull(dateRecherche) && !dateRecherche.isEmpty()) {
             return nouvelleRepository.findByTexteContainingAndDateGreaterThanEqual(
                     texteRecherche,
                     localDateTime
             );
         }
 
-        if (!Objects.isNull(texteRecherche)) {
+        if (!Objects.isNull(texteRecherche) && !texteRecherche.isEmpty() ) {
             return nouvelleRepository.findByTexteContaining(texteRecherche);
         }
 
-        if (!Objects.isNull(dateRecherche)) {
+        if (!Objects.isNull(dateRecherche) && !dateRecherche.isEmpty()) {
             return nouvelleRepository.findByDateGreaterThanEqual(localDateTime);
         }
 

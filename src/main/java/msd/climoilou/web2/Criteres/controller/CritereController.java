@@ -43,10 +43,10 @@ public class CritereController {
     @GetMapping("/{id}/nouvelles")
     public ResponseEntity<List<Long>> getNouvellesCriteres(@PathVariable long id) throws InterruptedException {
         logger.info("NouvelleController getNouvellesCriteres");
-        try{
+        try {
             if (critereService.existsById(id)) {
                 Optional<Critere> critere = critereService.getCritereById(id).stream().findFirst();
-                if(critere.isEmpty()){
+                if (critere.isEmpty()) {
                     return ResponseEntity.notFound().build();
                 }
                 Collection<Nouvelle> nouvelles = nouvelleService.getAll(critere.get());
@@ -57,7 +57,8 @@ public class CritereController {
             } else {
                 return ResponseEntity.notFound().build();
             }
-        } catch (Exception e){
+        } catch (Exception e) {
+            logger.error("An unexpected error occurred in getNouvellesCriteres for ID: {}", id, e);
             return ResponseEntity.internalServerError().build();
         }
     }
